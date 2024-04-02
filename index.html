@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cliente de Notificaciones por canal</title>
+</head>
+<body>
+    <ul id="notificaciones-list"></ul>
+    <input type="text" id="mensaje-input" placeholder="Escribe tu mensaje">
+    <input type="text" id="canal-input" placeholder="Canal de notificación">
+    <button id="enviar-btn">Enviar Notificación</button>
+    <button id="suscribir-btn">Suscribir a Canal</button>
+    <button id="desuscribir-btn">Desuscribir de Canal</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/socket.io@4.7.5/client-dist/socket.io.min.js"></script>
+    <script>
+        const socket = io('http://localhost:3006');
+        const notificacionesList = document.getElementById('notificaciones-list');
+        const mensajeInput = document.getElementById('mensaje-input');
+        const canalInput = document.getElementById('canal-input');
+        const enviarBtn = document.getElementById('enviar-btn');
+        const suscribirBtn = document.getElementById('suscribir-btn');
+        const desuscribirBtn = document.getElementById('desuscribir-btn');
+
+        socket.on('connect', () => {
+            console.log('Conectado al servidor de Socket.io');
+        });
+
+        socket.on('nuevaNotificacion', (data) => {
+            console.log('Nueva notificación recibida:', data);
+
+            const newNotification = document.createElement('li');
+            newNotification.textContent = data.mensaje;
+            notificacionesList.appendChild(newNotification);
+        });
+
+        enviarBtn.addEventListener('click', () => {
+            const mensaje = mensajeInput.value;
+            if (mensaje.trim() !== '') {
+                socket.emit('enviarNotificacion', { mensaje: mensaje });
+                mensajeInput.value = '';
+            }
+        });
+
+        suscribirBtn.addEventListener('click', () => {
+            const canal = canalInput.value;
+            if (canal.trim() !== '') {
+                socket.emit('subscribe', canal);
+                canalInput.value = '';
+            }
+        });
+
+        desuscribirBtn.addEventListener('click', () => {
+            const canal = canalInput.value;
+            if (canal.trim() !== '') {
+                socket.emit('unsubscribe', canal);
+                canalInput.value = '';
+            }
+        });
+    </script>
+</body>
+</html>
